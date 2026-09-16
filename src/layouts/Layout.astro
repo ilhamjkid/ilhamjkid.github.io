@@ -12,8 +12,8 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
+    <meta name="theme-color" content="#2563eb" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -22,17 +22,10 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     <title>{title}</title>
     <script is:inline>
       const savedTheme = localStorage.getItem("theme");
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       if (savedTheme === "dark" || savedTheme === "light") {
         document.documentElement.setAttribute("data-theme", savedTheme);
-        document
-          .getElementById("theme-color-meta")
-          .setAttribute("content", savedTheme === "dark" ? "#0d1117" : "#ffffff");
       } else {
         document.documentElement.removeAttribute("data-theme");
-        document
-          .getElementById("theme-color-meta")
-          .setAttribute("content", systemPrefersDark ? "#0d1117" : "#ffffff");
       }
     </script>
   </head>
@@ -47,13 +40,13 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
 </html>
 
 <style is:global>
-  :root,
-  :root[data-theme="light"] {
+  :root {
+    --accent-color: #2563eb;
+
     --bg-color: #ffffff;
     --text-color: #1a1a1a;
     --text-muted: #666666;
     --border-color: #e5e7eb;
-    --accent-color: #2563eb;
   }
 
   :root[data-theme="dark"] {
@@ -61,7 +54,6 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     --text-color: #e6edf3;
     --text-muted: #8b949e;
     --border-color: #30363d;
-    --accent-color: #58a6ff;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -70,7 +62,6 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
       --text-color: #e6edf3;
       --text-muted: #8b949e;
       --border-color: #30363d;
-      --accent-color: #58a6ff;
     }
   }
 
