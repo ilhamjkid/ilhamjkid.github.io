@@ -1,4 +1,6 @@
 ---
+import ThemeToggle from "../components/ThemeToggle.astro";
+
 interface Props {
   title?: string;
 }
@@ -12,11 +14,21 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script is:inline>
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    </script>
   </head>
   <body>
+    <header class="site-header container">
+      <ThemeToggle />
+    </header>
     <main class="container">
       <slot />
     </main>
@@ -24,7 +36,8 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
 </html>
 
 <style is:global>
-  :root {
+  :root,
+  :root[data-theme="light"] {
     --bg-color: #ffffff;
     --text-color: #1a1a1a;
     --text-muted: #666666;
@@ -32,8 +45,16 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     --accent-color: #2563eb;
   }
 
+  :root[data-theme="dark"] {
+    --bg-color: #0d1117;
+    --text-color: #e6edf3;
+    --text-muted: #8b949e;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+  }
+
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg-color: #0d1117;
       --text-color: #e6edf3;
       --text-muted: #8b949e;
@@ -97,5 +118,18 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     max-width: 960px;
     margin: 0 auto;
     padding: 0 1.5rem;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+    width: 100%;
+    background-color: var(--bg-color);
   }
 </style>
