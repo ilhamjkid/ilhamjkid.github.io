@@ -89,6 +89,15 @@ const { repo } = Astro.props;
     <p class="repo-description">
       {repo.description}
     </p>
+    {
+      repo.tech_stack.length > 0 && (
+        <div class="repo-tech-lists">
+          {repo.tech_stack.map((tech) => (
+            <span class="repo-tech-item">{tech}</span>
+          ))}
+        </div>
+      )
+    }
   </div>
 
   <div class="card-footer">
@@ -224,6 +233,24 @@ const { repo } = Astro.props;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .repo-tech-lists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .repo-tech-item {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.375rem;
+    background-color: var(--bg-muted);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    white-space: nowrap;
   }
 
   .card-footer {

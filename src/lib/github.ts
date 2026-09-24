@@ -1,3 +1,5 @@
+import { ALLOWED_TECH_STACK, formatTechName } from "./tech-stack";
+
 export interface Repository {
   id: number;
   name: string;
@@ -8,6 +10,7 @@ export interface Repository {
   forks_count: number;
   language: string | null;
   topics: string[];
+  tech_stack: string[];
 }
 
 interface GitHubRepoResponse extends Repository {
@@ -40,13 +43,22 @@ export async function getRepositories(): Promise<Repository[]> {
 
     const repos: GitHubRepoResponse[] = await response.json();
 
-    return repos.filter(
-      (repo) =>
-        !repo.fork &&
-        !repo.archived &&
-        repo.topics.includes("portfolio") &&
-        Boolean(repo.description && repo.description.trim() !== ""),
-    );
+    return repos
+      .filter(
+        (repo) =>
+          !repo.fork &&
+          !repo.archived &&
+          repo.topics.includes("portfolio") &&
+          Boolean(repo.description && repo.description.trim() !== ""),
+      )
+      .map((repo) => ({
+        ...repo,
+        tech_stack: repo.topics
+          .filter((topic) =>
+            ALLOWED_TECH_STACK.includes(topic as (typeof ALLOWED_TECH_STACK)[number]),
+          )
+          .map((topic) => formatTechName(topic)),
+      }));
   } catch (error) {
     console.warn("Error fetching GitHub repositories:", error);
     return [];

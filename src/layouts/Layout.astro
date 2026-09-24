@@ -44,6 +44,7 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
     --accent-color: #2563eb;
 
     --bg-color: #ffffff;
+    --bg-muted: #f3f4f6;
     --text-color: #1a1a1a;
     --text-muted: #666666;
     --border-color: #e5e7eb;
@@ -51,6 +52,7 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
 
   :root[data-theme="dark"] {
     --bg-color: #0d1117;
+    --bg-muted: #161b22;
     --text-color: #e6edf3;
     --text-muted: #8b949e;
     --border-color: #30363d;
@@ -59,6 +61,7 @@ const { title = "Ilham | Software Engineer" } = Astro.props;
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg-color: #0d1117;
+      --bg-muted: #161b22;
       --text-color: #e6edf3;
       --text-muted: #8b949e;
       --border-color: #30363d;
