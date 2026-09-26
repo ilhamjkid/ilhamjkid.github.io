@@ -16,5 +16,8 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "prettier-plugin-astro": "^1.1.0"
   }
 }
