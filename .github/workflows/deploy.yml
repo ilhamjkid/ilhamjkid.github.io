@@ -1,19 +1,37 @@
+# .github/workflows/deploy.yml
+# =============================================================================
+# Deploy Portfolio to GitHub Pages
+# -----------------------------------------------------------------------------
+# Builds the Astro site and deploys it to GitHub Pages.
+# Triggered by:
+#   - push to main
+#   - daily cron (refresh data / rebuild)
+#   - repository_dispatch "project-updated" (from other repos via notify workflow)
+#   - manual run from the Actions tab
+# =============================================================================
 name: Deploy Portfolio to GitHub Pages
 
 on:
   push:
     branches: [main]
+  # Rebuild daily at 17:00 UTC (00:00 WIB).
+  # Useful when the site fetches live data (e.g. GitHub stars/commits) at build time.
   schedule:
     - cron: "0 17 * * *"
+  # Fired by the notify-portfolio.yml workflow in another repo.
+  # NOTE: repository_dispatch only reads the DEFAULT branch of this repo.
   repository_dispatch:
     types: [project-updated]
+  # Allows triggering this workflow manually from the Actions tab.
   workflow_dispatch:
 
+# Required permissions for deploying to GitHub Pages via Actions.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read # read repo contents
+  pages: write # publish to GitHub Pages
+  id-token: write # OIDC token for deploy-pages
 
+# Prevent concurrent deploys. If a new run starts, cancel the previous one.
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -22,34 +40,67 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Fetch the repository.
+      # v6 requires runner >= v2.329.0 (GitHub-hosted runners are fine).
+      # Alternatives: pin to @v4 or @v5 if you need older runner compatibility.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
+      # Install Bun (fast all-in-one JS runtime + package manager + bundler).
+      # Alternatives:
+      #   Node.js  -> uses: actions/setup-node@v4
+      #              with: { node-version: '20', cache: 'npm' }
+      #   pnpm     -> uses: pnpm/action-setup@v4
+      #              with: { version: 9 }
+      #              then: uses: actions/setup-node@v4
+      #                    with: { node-version: '20', cache: 'pnpm' }
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
+      # Install dependencies.
+      # --frozen-lockfile requires a committed lockfile (bun.lockb / bun.lock).
+      # Alternatives:
+      #   npm  -> npm ci
+      #   pnpm -> pnpm install --frozen-lockfile
+      #   yarn -> yarn install --immutable
+      # If you don't have a lockfile yet, temporarily use: bun install
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # Build the Astro site. Output goes to ./dist.
+      # GITHUB_TOKEN is exposed so the build can query the GitHub API
+      # (e.g. fetch repo stats) without hitting rate limits.
+      # Alternatives:
+      #   npm  -> npm run build
+      #   pnpm -> pnpm run build
+      #   yarn -> yarn build
       - name: Build site with Astro
         run: bun run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Package ./dist into an artifact for the deploy job.
+      # v5 uses upload-artifact@v7 under the hood (Node 24).
+      # NOTE: since v4, dotfiles are NOT included by default.
+      #       Add `include-hidden-files: true` below if you need them.
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
+          # include-hidden-files: true   # uncomment if you need dotfiles in dist
 
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    # Deploy only after the build job succeeds.
     needs: build
     steps:
+      # Publish the uploaded artifact to GitHub Pages.
+      # Pair with upload-pages-artifact@v5 for a consistent Node 24 toolchain.
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
