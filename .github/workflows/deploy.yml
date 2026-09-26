@@ -5,6 +5,7 @@
 # Builds the Astro site and deploys it to GitHub Pages.
 # Triggered by:
 #   - push to main
+#   - pull requests targeting main (build-only check, no deploy)
 #   - daily cron (refresh data / rebuild)
 #   - repository_dispatch "project-updated" (from other repos via notify workflow)
 #   - manual run from the Actions tab
@@ -13,6 +14,10 @@ name: Deploy Portfolio to GitHub Pages
 
 on:
   push:
+    branches: [main]
+  # Run the build as a check on PRs (e.g. Dependabot bumps) before merging.
+  # This job never deploys on PR runs — see the `if:` guard on the deploy job.
+  pull_request:
     branches: [main]
   # Rebuild daily at 17:00 UTC (00:00 WIB).
   # Useful when the site fetches live data (e.g. GitHub stars/commits) at build time.
@@ -85,7 +90,10 @@ jobs:
       # v5 uses upload-artifact@v7 under the hood (Node 24).
       # NOTE: since v4, dotfiles are NOT included by default.
       #       Add `include-hidden-files: true` below if you need them.
+      # Skipped on PR runs since this workflow never deploys a PR anyway —
+      # no point uploading an artifact that will just be discarded.
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
@@ -98,6 +106,9 @@ jobs:
     runs-on: ubuntu-latest
     # Deploy only after the build job succeeds.
     needs: build
+    # Only deploy on actual pushes/schedule/dispatch — never on PR runs.
+    # PRs only need the build to succeed as a check, not a real deployment.
+    if: github.event_name != 'pull_request'
     steps:
       # Publish the uploaded artifact to GitHub Pages.
       # Pair with upload-pages-artifact@v5 for a consistent Node 24 toolchain.
