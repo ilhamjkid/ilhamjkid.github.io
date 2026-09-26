@@ -44,7 +44,7 @@ jobs:
       # v6 requires runner >= v2.329.0 (GitHub-hosted runners are fine).
       # Alternatives: pin to @v4 or @v5 if you need older runner compatibility.
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Install Bun (fast all-in-one JS runtime + package manager + bundler).
       # Alternatives:
