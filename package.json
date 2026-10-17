@@ -12,12 +12,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.3.2"
+    "astro": "^7.3.8"
   },
   "allowScripts": {
     "esbuild": true
   },
   "devDependencies": {
-    "prettier-plugin-astro": "^1.1.0"
+    "prettier-plugin-astro": "^1.1.1"
   }
 }
